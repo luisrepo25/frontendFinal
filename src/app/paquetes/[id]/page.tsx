@@ -1,6 +1,7 @@
 "use client";
 
 import { Navegacion } from "@/components/comunes/navegacion";
+import { DetailBreadcrumbs } from "@/components/comunes/breadcrumbs";
 import { PiePagina } from "@/components/comunes/pie-pagina";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -132,24 +133,15 @@ export default function PaginaDetallePaquete() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-blue-50">
       <Navegacion />
+      <DetailBreadcrumbs 
+        parentPage="Paquetes" 
+        parentHref="/paquetes" 
+        currentPageTitle={titulo || "Detalle del Paquete"} 
+      />
 
       <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8 animate-fade-in">
         {/* Header */}
         <div className="mb-8 animate-slide-up">
-          <div className="flex items-center mb-4 space-x-2 text-sm text-muted-foreground">
-            <span className="transition-colors cursor-pointer hover:text-primary">
-              Inicio
-            </span>
-            <span>/</span>
-            <span className="transition-colors cursor-pointer hover:text-primary">
-              Paquetes
-            </span>
-            <span>/</span>
-            <span className="font-medium text-foreground">
-              {paquete.nombre}
-            </span>
-          </div>
-
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-4 animate-fade-in-up">
               <div className="flex items-center space-x-2">

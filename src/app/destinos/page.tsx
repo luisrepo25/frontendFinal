@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Navegacion } from "@/components/comunes/navegacion"
+import { Breadcrumbs } from "@/components/comunes/breadcrumbs"
 import { PiePagina } from "@/components/comunes/pie-pagina"
 import { FiltrosBusqueda } from "@/components/destinos/filtros-busqueda"
 import { EncabezadoResultados } from "@/components/destinos/encabezado-resultados"
@@ -195,6 +196,7 @@ export default function PaginaDestinos() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-blue-50">
       <Navegacion />
+      <Breadcrumbs />
       <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8 lg:flex-row">
           {/* Barra lateral de filtros */}
@@ -233,13 +235,9 @@ export default function PaginaDestinos() {
                     ubicacion={destino.ubicacion}
                     descripcion={destino.descripcion}
                     calificacion={destino.calificacion}
-                    imagen={destino.imagen}
+                    urlImagen={destino.imagen}
                     precio={destino.precio}
                     duracion={destino.duracion}
-                    categoria={destino.categoria}
-                    maxPersonas={destino.maxPersonas}
-                    precioNumerico={destino.precioNumerico}
-                    duracionId={destino.duracionId}
                   />                 ) : (
                   <ItemListaDestino
                     key={destino.id}
@@ -248,13 +246,11 @@ export default function PaginaDestinos() {
                     ubicacion={destino.ubicacion}
                     descripcion={destino.descripcion}
                     calificacion={destino.calificacion}
-                    imagen={destino.imagen}
+                    urlImagen={destino.imagen}
                     precio={destino.precio}
                     duracion={destino.duracion}
                     categoria={destino.categoria}
                     maxPersonas={destino.maxPersonas}
-                    precioNumerico={destino.precioNumerico}
-                    duracionId={destino.duracionId}
                   />
                 ),
               )}

@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { Navegacion } from "@/components/comunes/navegacion"
+import { Breadcrumbs } from "@/components/comunes/breadcrumbs"
 import { PiePagina } from "@/components/comunes/pie-pagina"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -110,25 +111,11 @@ export default function PaginaReserva() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-blue-50">
       <Navegacion />
+      <Breadcrumbs />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
         {/* Header */}
         <div className="mb-8 animate-slide-up">
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-4">
-            <span className="hover:text-primary cursor-pointer transition-colors" onClick={() => router.push("/")}>
-              Inicio
-            </span>
-            <span>/</span>
-            <span
-              className="hover:text-primary cursor-pointer transition-colors"
-              onClick={() => router.push("/paquetes")}
-            >
-              Paquetes
-            </span>
-            <span>/</span>
-            <span className="text-foreground font-medium">Reserva</span>
-          </div>
-
           <h1 className="font-heading font-black text-3xl lg:text-4xl text-foreground bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
             Completa tu Reserva
           </h1>

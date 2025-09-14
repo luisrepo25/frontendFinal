@@ -1,6 +1,7 @@
 "use client";
 
 import { Navegacion } from "@/components/comunes/navegacion";
+import { Breadcrumbs } from "@/components/comunes/breadcrumbs";
 import { PiePagina } from "@/components/comunes/pie-pagina";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -180,6 +181,7 @@ export default function PaginaPaquetes() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-blue-50">
       <Navegacion />
+      <Breadcrumbs />
       
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}

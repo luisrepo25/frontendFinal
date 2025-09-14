@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { Navegacion } from "@/components/comunes/navegacion"
+import { Breadcrumbs } from "@/components/comunes/breadcrumbs"
 import { PiePagina } from "@/components/comunes/pie-pagina"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -87,6 +88,7 @@ export default function ContactoPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-blue-50">
       <Navegacion />
+      <Breadcrumbs />
 
       {/* Hero Section */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-primary/10 to-accent/10">
