@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AlertCircle } from "lucide-react";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -34,13 +35,37 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
     e.preventDefault();
     setLoadingForm(true);
     setError("");
-    const res = await login(form.email, form.password);
-    await reloadUser();
-    if (res.success) {
-      setRedirectPending(true);
-    } else {
-      setError(res.message || "Ha ocurrido un error desconocido");
+    
+    try {
+      const res = await login(form.email, form.password);
+      
+      if (res.success) {
+        // Solo recargar usuario si el login fue exitoso
+        await reloadUser();
+        setRedirectPending(true);
+      } else {
+        // Asegurar que no hay redirección pendiente en caso de error
+        setRedirectPending(false);
+        
+        // Mensajes de error más específicos
+        if (res.message?.includes("credentials") || res.message?.includes("credenciales")) {
+          setError("❌ Email o contraseña incorrectos. Verifica tus datos.");
+        } else if (res.message?.includes("invalid") || res.message?.includes("inválido")) {
+          setError("❌ Credenciales inválidas. Intenta nuevamente.");
+        } else if (res.message?.includes("not found") || res.message?.includes("no encontrado")) {
+          setError("❌ Usuario no encontrado. Verifica tu email.");
+        } else if (res.message?.includes("blocked") || res.message?.includes("bloqueado")) {
+          setError("❌ Tu cuenta está bloqueada. Contacta al administrador.");
+        } else {
+          setError(res.message || "❌ Error de conexión. Intenta nuevamente.");
+        }
+      }
+    } catch (error) {
+      // Asegurar que no hay redirección pendiente en caso de error
+      setRedirectPending(false);
+      setError("❌ Error de conexión. Verifica tu internet e intenta nuevamente.");
     }
+    
     setLoadingForm(false);
   };
 
@@ -72,7 +97,14 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         <Button type="submit" className="w-full" disabled={loadingForm}>
           {loadingForm ? "Ingresando..." : "Ingresar"}
         </Button>
-        {error && <div className="text-red-500 text-center text-sm">{error}</div>}
+        
+        {/* Mensaje de error mejorado */}
+        {error && (
+          <div className="flex items-center gap-2 p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+            <AlertCircle className="w-4 h-4 text-red-500" />
+            <span>{error}</span>
+          </div>
+        )}
       </div>
       <div className="text-center text-sm">
         ¿No tienes cuenta?{" "}

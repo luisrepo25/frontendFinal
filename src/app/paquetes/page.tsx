@@ -4,411 +4,409 @@ import { Navegacion } from "@/components/comunes/navegacion";
 import { PiePagina } from "@/components/comunes/pie-pagina";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+// Removemos la importación de Select que está causando problemas
 import {
   Star,
-  Heart,
-  Share2,
+  MapPin,
   Clock,
   Users,
-  Calendar,
-  MapPin,
-  CheckCircle,
-  XCircle,
+  Search,
+  Filter,
+  SlidersHorizontal,
+  Heart,
 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useParams } from "next/navigation";
-import { obtenerDatosPaquete } from "@/lib/paquetes";
+import Link from "next/link";
 
-export default function PaginaDetallePaquete() {
-  // Normalizamos el id para garantizar string
-  const p = useParams();
-  const id = Array.isArray((p as any).id) ? (p as any).id[0] : ((p as any).id as string);
+// Mock data de paquetes - esto debería venir del backend
+const paquetesData = [
+  {
+    id: "1",
+    nombre: "Salar de Uyuni 3 Días",
+    ubicacion: "Uyuni, Potosí",
+    descripcionCorta: "Aventura única en el desierto de sal más grande del mundo",
+    precio: "Bs. 1,200",
+    precioOriginal: "Bs. 1,500",
+    duracion: "3 días, 2 noches",
+    maxPersonas: 8,
+    calificacion: 4.8,
+    numeroReseñas: 124,
+    categoria: "Aventura",
+    dificultad: "Moderada",
+    descuento: 20,
+    imagenes: ["/salar-de-uyuni-espejo.png", "/salar-de-uyuni-atardecer.png"],
+    fechaCreacion: "2024-01-15"
+  },
+  {
+    id: "2", 
+    nombre: "Lago Titicaca y Copacabana",
+    ubicacion: "La Paz",
+    descripcionCorta: "Explora el lago navegable más alto del mundo y sus islas sagradas",
+    precio: "Bs. 800",
+    precioOriginal: "",
+    duracion: "2 días, 1 noche",
+    maxPersonas: 12,
+    calificacion: 4.6,
+    numeroReseñas: 89,
+    categoria: "Cultural",
+    dificultad: "Fácil",
+    descuento: 0,
+    imagenes: ["/lago-titicaca-bolivia-panorama.png", "/copacabana-bolivia.png"],
+    fechaCreacion: "2024-02-01"
+  },
+  {
+    id: "3",
+    nombre: "Amazonía Madidi",
+    ubicacion: "Rurrenabaque",
+    descripcionCorta: "Inmersión en la selva amazónica más biodiversa del planeta",
+    precio: "Bs. 2,100",
+    precioOriginal: "Bs. 2,400",
+    duracion: "5 días, 4 noches",
+    maxPersonas: 6,
+    calificacion: 4.9,
+    numeroReseñas: 67,
+    categoria: "Ecoturismo",
+    dificultad: "Avanzada",
+    descuento: 12,
+    imagenes: ["/madidi-amazon-rainforest.png"],
+    fechaCreacion: "2024-01-20"
+  },
+  {
+    id: "4",
+    nombre: "Tiwanaku y Cultura Aymara",
+    ubicacion: "La Paz",
+    descripcionCorta: "Descubre la civilización preincaica más importante de Bolivia",
+    precio: "Bs. 450",
+    precioOriginal: "",
+    duracion: "1 día",
+    maxPersonas: 15,
+    calificacion: 4.4,
+    numeroReseñas: 156,
+    categoria: "Cultural",
+    dificultad: "Fácil",
+    descuento: 0,
+    imagenes: ["/tiwanaku-community.png", "/aymara-culture-bolivia.png"],
+    fechaCreacion: "2024-03-01"
+  },
+  {
+    id: "5",
+    nombre: "Trekking en los Andes",
+    ubicacion: "Cordillera Real",
+    descripcionCorta: "Aventura de alta montaña entre glaciares y lagunas andinas",
+    precio: "Bs. 1,800",
+    precioOriginal: "Bs. 2,000",
+    duracion: "4 días, 3 noches",
+    maxPersonas: 8,
+    calificacion: 4.7,
+    numeroReseñas: 45,
+    categoria: "Aventura",
+    dificultad: "Avanzada",
+    descuento: 10,
+    imagenes: ["/bolivia-andes-trekking.png"],
+    fechaCreacion: "2024-02-15"
+  }
+];
 
-  const paquete = obtenerDatosPaquete(id);
+export default function PaginaPaquetes() {
+  const [paquetes, setPaquetes] = useState(paquetesData);
+  const [paquetesFiltrados, setPaquetesFiltrados] = useState(paquetesData);
+  const [terminoBusqueda, setTerminoBusqueda] = useState("");
+  const [categoriaFiltro, setCategoriaFiltro] = useState("");
+  const [dificultadFiltro, setDificultadFiltro] = useState("");
+  const [ordenarPor, setOrdenarPor] = useState("relevancia");
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
-  const [esFavorito, setEsFavorito] = useState(false);
-  const [titulo, setTitulo] = useState("");
+  // Obtener categorías únicas
+  const categorias = [...new Set(paquetes.map(p => p.categoria))];
+  const dificultades = [...new Set(paquetes.map(p => p.dificultad))];
 
   useEffect(() => {
-    if (paquete) setTitulo(paquete.nombre);
-  }, [paquete]);
+    let filtrados = [...paquetes];
 
-  const alternarFavorito = () => {
-    setEsFavorito((prev) => !prev);
-    const agregado = !esFavorito;
-
-    toast({
-      title: agregado ? "Agregado a favoritos" : "Eliminado de favoritos",
-      description: agregado
-        ? `${titulo} ha sido agregado a tus favoritos`
-        : `${titulo} ha sido eliminado de tus favoritos`,
-    });
-  };
-
-  const compartir = async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: titulo,
-          text: `¡Mira este increíble destino en Bolivia: ${titulo}!`,
-          url,
-        });
-      } else {
-        await navigator.clipboard.writeText(url);
-        toast({
-          title: "Enlace copiado",
-          description: "El enlace ha sido copiado al portapapeles",
-        });
-      }
-    } catch (error) {
-      console.log("Error al compartir:", error);
+    // Filtrar por término de búsqueda
+    if (terminoBusqueda) {
+      filtrados = filtrados.filter(paquete =>
+        paquete.nombre.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+        paquete.ubicacion.toLowerCase().includes(terminoBusqueda.toLowerCase()) ||
+        paquete.descripcionCorta.toLowerCase().includes(terminoBusqueda.toLowerCase())
+      );
     }
-  };
 
-  if (!paquete) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-blue-50">
-        <Navegacion />
-        <div className="max-w-4xl px-4 py-16 mx-auto text-center animate-fade-in">
-          <h1 className="mb-4 text-2xl font-bold font-heading text-foreground">
-            Paquete no encontrado
-          </h1>
-          <p className="text-muted-foreground">
-            El paquete que buscas no existe o ha sido movido.
-          </p>
-          <Button className="mt-6" onClick={() => window.history.back()}>
-            Volver atrás
-          </Button>
-        </div>
-        <PiePagina />
-      </div>
-    );
-  }
+    // Filtrar por categoría
+    if (categoriaFiltro) {
+      filtrados = filtrados.filter(paquete => paquete.categoria === categoriaFiltro);
+    }
+
+    // Filtrar por dificultad
+    if (dificultadFiltro) {
+      filtrados = filtrados.filter(paquete => paquete.dificultad === dificultadFiltro);
+    }
+
+    // Ordenar
+    switch (ordenarPor) {
+      case "precio-asc":
+        filtrados.sort((a, b) => parseInt(a.precio.replace(/[^\d]/g, '')) - parseInt(b.precio.replace(/[^\d]/g, '')));
+        break;
+      case "precio-desc":
+        filtrados.sort((a, b) => parseInt(b.precio.replace(/[^\d]/g, '')) - parseInt(a.precio.replace(/[^\d]/g, '')));
+        break;
+      case "calificacion":
+        filtrados.sort((a, b) => b.calificacion - a.calificacion);
+        break;
+      case "duracion":
+        filtrados.sort((a, b) => parseInt(a.duracion) - parseInt(b.duracion));
+        break;
+      case "recientes":
+        filtrados.sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime());
+        break;
+      default:
+        // Relevancia (por calificación y número de reseñas)
+        filtrados.sort((a, b) => (b.calificacion * b.numeroReseñas) - (a.calificacion * a.numeroReseñas));
+    }
+
+    setPaquetesFiltrados(filtrados);
+  }, [terminoBusqueda, categoriaFiltro, dificultadFiltro, ordenarPor, paquetes]);
+
+  const limpiarFiltros = () => {
+    setTerminoBusqueda("");
+    setCategoriaFiltro("");
+    setDificultadFiltro("");
+    setOrdenarPor("relevancia");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-blue-50">
       <Navegacion />
-
-      <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8 animate-fade-in">
+      
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8 animate-slide-up">
-          <div className="flex items-center mb-4 space-x-2 text-sm text-muted-foreground">
-            <span className="transition-colors cursor-pointer hover:text-primary">Inicio</span>
-            <span>/</span>
-            <span className="transition-colors cursor-pointer hover:text-primary">Paquetes</span>
-            <span>/</span>
-            <span className="font-medium text-foreground">{paquete.nombre}</span>
-          </div>
-
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="space-y-4 animate-fade-in-up">
-              <div className="flex items-center space-x-2">
-                <Badge className="bg-primary/10 text-primary border-primary/20 animate-bounce-in">
-                  {paquete.categoria}
-                </Badge>
-                <Badge variant="outline" className="animate-bounce-in animation-delay-100">
-                  {paquete.dificultad}
-                </Badge>
-                {paquete.descuento && (
-                  <Badge className="text-white bg-red-500 animate-bounce-in animation-delay-200">
-                    -{paquete.descuento}% OFF
-                  </Badge>
-                )}
-              </div>
-
-              <h1 className="text-3xl font-black font-heading lg:text-4xl text-foreground bg-gradient-to-r from-primary to-accent bg-clip-text">
-                {paquete.nombre}
-              </h1>
-
-              <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-                <div className="flex items-center space-x-1 transition-colors hover:text-primary">
-                  <MapPin className="w-4 h-4" />
-                  <span>{paquete.ubicacion}</span>
-                </div>
-                <div className="flex items-center space-x-1 transition-colors hover:text-accent">
-                  <Clock className="w-4 h-4" />
-                  <span>{paquete.duracion}</span>
-                </div>
-                <div className="flex items-center space-x-1 transition-colors hover:text-primary">
-                  <Users className="w-4 h-4" />
-                  <span>Hasta {paquete.maxPersonas} personas</span>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2 animate-fade-in-up animation-delay-200">
-                <div className="flex items-center space-x-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-5 w-5 transition-all duration-200 hover:scale-110 ${
-                        i < Math.floor(paquete.calificacion)
-                          ? "text-amber-400 fill-amber-400"
-                          : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-lg font-semibold">{paquete.calificacion}</span>
-                <span className="text-muted-foreground">({paquete.numeroReseñas} reseñas)</span>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3 animate-fade-in-up animation-delay-300">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={alternarFavorito}
-                className="text-gray-700 border-0 bg-white/90 shadow-md active:scale-95 md:shadow-lg transition-all duration-200 hover:bg-white hover:scale-105 focus-visible:ring-2 focus-visible:ring-amber-400"
-              >
-                <Heart
-                  className={`h-5 w-5 transition-colors ${
-                    esFavorito ? "fill-red-500 text-red-500 animate-heartBeat" : ""
-                  }`}
-                />
-                {" "}Guardar
-              </Button>
-
-              <Button
-                variant="secondary"
-                size="sm"
-                className="text-gray-700 border-0 bg-white/90 shadow-md active:scale-95 md:shadow-lg transition-all duration-200 hover:bg-white hover:scale-105 focus-visible:ring-2 focus-visible:ring-amber-400"
-                onClick={compartir}
-              >
-                <Share2 className="w-4 h-4 mr-2" />
-                Compartir
-              </Button>
-            </div>
-          </div>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-black font-heading text-foreground mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Paquetes Turísticos
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Descubre los mejores destinos de Bolivia con nuestros paquetes cuidadosamente diseñados para brindarte experiencias inolvidables
+          </p>
         </div>
 
-        {/* Image Gallery */}
-        <div className="mb-8 animate-slide-up animation-delay-200">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 h-96">
-            <div className="lg:col-span-2 lg:row-span-2 relative">
-              <Image
-                src={paquete.imagenes[0] || "/placeholder.svg"}
-                alt={paquete.nombre}
-                fill
-                className="object-cover w-full h-full transition-transform duration-300 rounded-lg hover:scale-105"
+        {/* Filtros y búsqueda */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row gap-4 mb-4">
+            {/* Barra de búsqueda */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Buscar destinos, ubicaciones..."
+                value={terminoBusqueda}
+                onChange={(e) => setTerminoBusqueda(e.target.value)}
+                className="pl-10"
               />
             </div>
-            {paquete.imagenes.slice(1, 5).map((imagen, index) => (
-              <div
-                key={index}
-                className="animate-fade-in-up relative"
-                style={{ animationDelay: `${300 + index * 100}ms` }}
-              >
-                <Image
-                  src={imagen || "/placeholder.svg"}
-                  alt={`${paquete.nombre} ${index + 2}`}
-                  className="object-cover w-full h-full transition-transform duration-300 rounded-lg hover:scale-105"
-                  width={600}
-                  height={400}
-                />
-              </div>
+
+            {/* Botón de filtros móvil */}
+            <Button
+              variant="outline"
+              onClick={() => setMostrarFiltros(!mostrarFiltros)}
+              className="lg:hidden"
+            >
+              <SlidersHorizontal className="h-4 w-4 mr-2" />
+              Filtros
+            </Button>
+
+            {/* Ordenar */}
+            <select
+              value={ordenarPor}
+              onChange={(e) => setOrdenarPor(e.target.value)}
+              className="w-full lg:w-48 h-10 px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            >
+              <option value="relevancia">Más Relevantes</option>
+              <option value="precio-asc">Precio: Menor a Mayor</option>
+              <option value="precio-desc">Precio: Mayor a Menor</option>
+              <option value="calificacion">Mejor Calificados</option>
+              <option value="duracion">Duración</option>
+              <option value="recientes">Más Recientes</option>
+            </select>
+          </div>
+
+          {/* Panel de filtros */}
+          <div className={`${mostrarFiltros ? 'block' : 'hidden'} lg:block`}>
+            <Card>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Categoría</label>
+                    <select
+                      value={categoriaFiltro}
+                      onChange={(e) => setCategoriaFiltro(e.target.value)}
+                      className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    >
+                      <option value="">Todas las categorías</option>
+                      {categorias.map(categoria => (
+                        <option key={categoria} value={categoria}>{categoria}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Dificultad</label>
+                    <select
+                      value={dificultadFiltro}
+                      onChange={(e) => setDificultadFiltro(e.target.value)}
+                      className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    >
+                      <option value="">Todas las dificultades</option>
+                      {dificultades.map(dificultad => (
+                        <option key={dificultad} value={dificultad}>{dificultad}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex items-end">
+                    <Button variant="outline" onClick={limpiarFiltros} className="w-full">
+                      Limpiar Filtros
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Resultados */}
+        <div className="mb-6">
+          <p className="text-muted-foreground">
+            Mostrando {paquetesFiltrados.length} de {paquetes.length} paquetes
+          </p>
+        </div>
+
+        {/* Grid de paquetes */}
+        {paquetesFiltrados.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-12">
+              <div className="text-4xl mb-4">🎒</div>
+              <h3 className="text-xl font-semibold mb-2">No se encontraron paquetes</h3>
+              <p className="text-muted-foreground mb-4">
+                No hay paquetes que coincidan con tus criterios de búsqueda
+              </p>
+              <Button onClick={limpiarFiltros}>Limpiar filtros</Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paquetesFiltrados.map((paquete) => (
+              <Card key={paquete.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
+                <div className="relative">
+                  <div className="aspect-video relative overflow-hidden">
+                    <Image
+                      src={paquete.imagenes[0] || "/placeholder.svg"}
+                      alt={paquete.nombre}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                  
+                  {/* Overlay con iconos */}
+                  <div className="absolute top-2 right-2 flex gap-2">
+                    {paquete.descuento > 0 && (
+                      <Badge className="bg-red-500 text-white">
+                        -{paquete.descuento}%
+                      </Badge>
+                    )}
+                    <Button variant="secondary" size="sm" className="h-8 w-8 p-0 bg-white/90 hover:bg-white">
+                      <Heart className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Badges de categoría y dificultad */}
+                  <div className="absolute bottom-2 left-2 flex gap-2">
+                    <Badge variant="secondary" className="bg-white/90 text-gray-700">
+                      {paquete.categoria}
+                    </Badge>
+                    <Badge variant="outline" className="bg-white/90 border-gray-300">
+                      {paquete.dificultad}
+                    </Badge>
+                  </div>
+                </div>
+
+                <CardContent className="p-4">
+                  <div className="mb-3">
+                    <h3 className="font-bold text-lg mb-1 group-hover:text-primary transition-colors">
+                      <Link href={`/paquetes/${paquete.id}`} className="hover:underline">
+                        {paquete.nombre}
+                      </Link>
+                    </h3>
+                    <div className="flex items-center text-sm text-muted-foreground mb-2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {paquete.ubicacion}
+                    </div>
+                    <p className="text-sm text-muted-foreground overflow-hidden" style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical'
+                    }}>
+                      {paquete.descripcionCorta}
+                    </p>
+                  </div>
+
+                  {/* Calificación */}
+                  <div className="flex items-center mb-3">
+                    <div className="flex items-center mr-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${
+                            i < Math.floor(paquete.calificacion)
+                              ? "text-amber-400 fill-amber-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm font-medium">{paquete.calificacion}</span>
+                    <span className="text-sm text-muted-foreground ml-1">
+                      ({paquete.numeroReseñas} reseñas)
+                    </span>
+                  </div>
+
+                  {/* Detalles del viaje */}
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-1" />
+                      {paquete.duracion}
+                    </div>
+                    <div className="flex items-center">
+                      <Users className="h-4 w-4 mr-1" />
+                      Hasta {paquete.maxPersonas}
+                    </div>
+                  </div>
+
+                  {/* Precio y botón */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      {paquete.precioOriginal && (
+                        <div className="text-sm line-through text-muted-foreground">
+                          {paquete.precioOriginal}
+                        </div>
+                      )}
+                      <div className="text-xl font-bold text-primary">
+                        {paquete.precio}
+                      </div>
+                      <div className="text-sm text-muted-foreground">por persona</div>
+                    </div>
+                    <Link href={`/paquetes/${paquete.id}`}>
+                      <Button className="bg-primary hover:bg-primary/90">
+                        Ver Detalles
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {/* Main Content */}
-          <div className="space-y-8 lg:col-span-2">
-            {/* Description */}
-            <Card className="transition-shadow duration-300 animate-fade-in-up animation-delay-300 hover:shadow-lg">
-              <CardContent className="p-6">
-                <h2 className="mb-4 text-xl font-bold font-heading text-primary">Sobre este paquete</h2>
-                <div className="prose prose-gray max-w-none">
-                  {paquete.descripcionCompleta.split("\n\n").map((parrafo, index) => (
-                    <p
-                      key={index}
-                      className="mb-4 leading-relaxed text-muted-foreground animate-fade-in-up"
-                      style={{ animationDelay: `${400 + index * 100}ms` }}
-                    >
-                      {parrafo}
-                    </p>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Destinos incluidos */}
-            <Card className="transition-shadow duration-300 animate-fade-in-up animation-delay-400 hover:shadow-lg">
-              <CardContent className="p-6">
-                <h2 className="mb-4 text-xl font-bold font-heading text-primary">Destinos incluidos</h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {paquete.destinos.map((destino, index) => (
-                    <div
-                      key={index}
-                      className="p-4 transition-shadow border rounded-lg border-border hover:shadow-md animate-fade-in-up"
-                      style={{ animationDelay: `${500 + index * 100}ms` }}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-foreground">{destino.nombre}</h3>
-                        <Badge variant="secondary">{destino.dias} días</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{destino.descripcion}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Itinerario */}
-            <Card className="transition-shadow duration-300 animate-fade-in-up animation-delay-500 hover:shadow-lg">
-              <CardContent className="p-6">
-                <h2 className="mb-4 text-xl font-bold font-heading text-primary">Itinerario detallado</h2>
-                <div className="space-y-4">
-                  {paquete.itinerario.map((dia, index) => (
-                    <div
-                      key={index}
-                      className="pl-4 border-l-4 border-primary/20 animate-fade-in-up"
-                      style={{ animationDelay: `${600 + index * 50}ms` }}
-                    >
-                      <div className="flex items-center mb-2 space-x-2">
-                        <Badge className="bg-primary text-primary-foreground">Día {dia.dia}</Badge>
-                        <h3 className="font-semibold text-foreground">{dia.titulo}</h3>
-                      </div>
-                      <ul className="space-y-1">
-                        {dia.actividades.map((actividad, actIndex) => (
-                          <li key={actIndex} className="flex items-center text-sm text-muted-foreground">
-                            <CheckCircle className="flex-shrink-0 w-3 h-3 mr-2 text-green-500" />
-                            {actividad}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* What's Included */}
-            <Card className="transition-shadow duration-300 animate-fade-in-up animation-delay-600 hover:shadow-lg">
-              <CardContent className="p-6">
-                <h2 className="mb-4 text-xl font-bold font-heading text-primary">Qué incluye</h2>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div className="animate-slide-right">
-                    <h3 className="flex items-center mb-3 font-semibold text-green-700">
-                      <CheckCircle className="w-5 h-5 mr-2" />
-                      Incluido
-                    </h3>
-                    <ul className="space-y-2">
-                      {paquete.incluido.map((item, index) => (
-                        <li
-                          key={index}
-                          className="flex items-center text-sm text-muted-foreground animate-fade-in-up"
-                          style={{ animationDelay: `${700 + index * 50}ms` }}
-                        >
-                          <CheckCircle className="flex-shrink-0 w-4 h-4 mr-3 text-green-500" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="animate-slide-left">
-                    <h3 className="flex items-center mb-3 font-semibold text-red-700">
-                      <XCircle className="w-5 h-5 mr-2" />
-                      No incluido
-                    </h3>
-                    <ul className="space-y-2">
-                      {paquete.noIncluido.map((item, index) => (
-                        <li
-                          key={index}
-                          className="flex items-center text-sm text-muted-foreground animate-fade-in-up"
-                          style={{ animationDelay: `${800 + index * 50}ms` }}
-                        >
-                          <XCircle className="flex-shrink-0 w-4 h-4 mr-3 text-red-500" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <Card className="z-10 transition-all duration-300 border-2 lg:sticky lg:top-6 bg-white/95 backdrop-blur-sm animate-fade-in-up animation-delay-400 hover:shadow-xl border-primary/10">
-              <CardContent className="p-6">
-                <div className="mb-6 text-center">
-                  {paquete.precioOriginal && (
-                    <div className="mb-1 text-lg line-through text-muted-foreground">
-                      {paquete.precioOriginal}
-                    </div>
-                  )}
-                  <div className="mb-1 text-3xl font-black text-transparent font-heading text-primary bg-gradient-to-r from-primary to-accent bg-clip-text animate-pulse-gentle">
-                    {paquete.precio}
-                  </div>
-                  <div className="text-sm text-muted-foreground">por persona</div>
-                  {paquete.descuento && (
-                    <Badge className="mt-2 text-white bg-red-500">¡Ahorra {paquete.descuento}%!</Badge>
-                  )}
-                </div>
-
-                <div className="mb-6 space-y-4">
-                  <div className="animate-slide-right">
-                    <label className="text-sm font-medium text-muted-foreground">Fecha de salida</label>
-                    <select className="w-full px-3 py-2 mt-1 transition-all duration-200 border rounded-lg border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-                      <option>Seleccionar fecha</option>
-                      {paquete.fechasDisponibles.map((fecha) => (
-                        <option key={fecha} value={fecha}>
-                          {new Date(fecha).toLocaleDateString("es-ES", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="animate-slide-left">
-                    <label className="text-sm font-medium text-muted-foreground">Número de personas</label>
-                    <select className="w-full px-3 py-2 mt-1 transition-all duration-200 border rounded-lg border-border focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
-                      <option>1 persona</option>
-                      <option>2 personas</option>
-                      <option>3 personas</option>
-                      <option>4 personas</option>
-                    </select>
-                  </div>
-                </div>
-
-                <Button
-                  className="w-full py-3 mb-3 font-semibold text-white transition-all duration-200 shadow-lg bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 hover:scale-105 hover:shadow-xl"
-                  onClick={() =>
-                    (window.location.href = `/reserva?paquete=${paquete.id}&nombre=${encodeURIComponent(
-                      paquete.nombre
-                    )}&precio=${encodeURIComponent(paquete.precio)}`)
-                  }
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Reservar paquete
-                </Button>
-
-                <div className="text-xs text-center text-muted-foreground animate-fade-in-up animation-delay-600">
-                  Reserva con solo $100. Paga el resto 30 días antes del viaje.
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="transition-shadow duration-300 animate-fade-in-up animation-delay-500 hover:shadow-lg">
-              <CardContent className="p-6 text-center">
-                <h3 className="mb-2 font-semibold">¿Necesitas ayuda?</h3>
-                <p className="mb-4 text-sm text-muted-foreground">
-                  Nuestros expertos están listos para ayudarte a planificar tu viaje perfecto.
-                </p>
-                <Button variant="outline" className="w-full transition-all duration-200 bg-transparent hover:scale-105">
-                  Contactar asesor
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        )}
       </div>
 
       <PiePagina />

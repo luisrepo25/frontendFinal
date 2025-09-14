@@ -18,12 +18,36 @@ const ClientDashboard = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  // Función auxiliar para formatear fecha para input de tipo date
+  const formatDateForInput = (dateString: string | null | undefined): string => {
+    if (!dateString) return "";
+    
+    // Si la fecha contiene 'T' (formato ISO), tomar solo la parte de la fecha
+    if (dateString.includes('T')) {
+      return dateString.split('T')[0];
+    }
+    
+    // Si ya está en formato YYYY-MM-DD, devolverla tal como está
+    return dateString;
+  };
+
   // Cargar datos del usuario al montar el componente
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await getUser();
-        setUser(response.data);
+        // Asegurar que todos los campos tengan valores válidos
+        const userData = {
+          nombres: response.data.nombres || "",
+          apellidos: response.data.apellidos || "",
+          email: response.data.email || "",
+          telefono: response.data.telefono || "",
+          fecha_nacimiento: response.data.fecha_nacimiento || "",
+          genero: response.data.genero || "",
+          documento_identidad: response.data.documento_identidad || "",
+          pais: response.data.pais || ""
+        };
+        setUser(userData);
       } catch (error) {
         console.error("Error al cargar datos del usuario:", error);
         toast({
@@ -142,7 +166,7 @@ const ClientDashboard = () => {
           <input
             type="date"
             name="fecha_nacimiento"
-            value={user.fecha_nacimiento}
+            value={formatDateForInput(user.fecha_nacimiento)}
             onChange={handleInputChange}
             disabled={!editMode}
             className="w-full border border-blue-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition bg-gray-100 disabled:opacity-70"

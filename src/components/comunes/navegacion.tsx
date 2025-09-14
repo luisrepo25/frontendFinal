@@ -41,7 +41,23 @@ export function Navegacion() {
             <LoadingLink href="/destinos">Destinos</LoadingLink>
             <LoadingLink href="/paquetes">Paquetes</LoadingLink>
             <LoadingLink href="/contacto">Contacto</LoadingLink>
-            <LoadingLink href="/panel">Panel</LoadingLink>
+            {/* Mostrar Panel Admin o Mi Panel según el rol */}
+            {(() => {
+              const { user } = auth;
+              if (!user) return null;
+              
+              // Verificar si el usuario es admin (rol 1 o rol "ADMIN")
+              const isAdmin = user?.roles?.includes(1) || user?.role === "ADMIN";
+              // Verificar si el usuario es cliente (rol 3 o rol "CLIENTE")
+              const isClient = user?.roles?.includes(3) || user?.role === "CLIENTE";
+              
+              if (isAdmin) {
+                return <LoadingLink href="/panel">Panel Admin</LoadingLink>;
+              } else if (isClient) {
+                return <LoadingLink href="/cliente">Mi Panel</LoadingLink>;
+              }
+              return null;
+            })()}
             {/* Show avatar if logged in, else Login link */}
             {(() => {
               const { user } = auth;
@@ -86,6 +102,31 @@ export function Navegacion() {
               <LoadingLink href="/contacto" className="block px-3 py-2">
                 Contacto
               </LoadingLink>
+              {/* Mostrar Panel Admin o Mi Panel según el rol */}
+              {(() => {
+                const { user } = auth;
+                if (!user) return null;
+                
+                // Verificar si el usuario es admin (rol 1 o rol "ADMIN")
+                const isAdmin = user?.roles?.includes(1) || user?.role === "ADMIN";
+                // Verificar si el usuario es cliente (rol 3 o rol "CLIENTE")
+                const isClient = user?.roles?.includes(3) || user?.role === "CLIENTE";
+                
+                if (isAdmin) {
+                  return (
+                    <LoadingLink href="/panel" className="block px-3 py-2">
+                      Panel Admin
+                    </LoadingLink>
+                  );
+                } else if (isClient) {
+                  return (
+                    <LoadingLink href="/cliente" className="block px-3 py-2">
+                      Mi Panel
+                    </LoadingLink>
+                  );
+                }
+                return null;
+              })()}
               {(() => {
                 const { user } = auth;
                 if (user) {
